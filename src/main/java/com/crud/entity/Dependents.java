@@ -37,6 +37,20 @@ public class Dependents {
     @JoinColumn(name = "Enrol_ID")
     private Enrollees enrollees;
 
+	public Dependents() {
+	}
+	
+	
+
+	public Dependents(int id, String name, String dob, Enrollees enrollees) {
+		this.id = id;
+		this.name = name;
+		this.dob = dob;
+		this.enrollees = enrollees;
+	}
+
+
+
 	public Enrollees getEnrollees() {
 		return enrollees;
 	}

@@ -57,7 +57,7 @@ public class DependentsController {
 	@PostMapping("addDependentToEnrol/{id}")
 	public ResponseEntity<Dependents> createDependentsFromEnrol(@PathVariable("id") Integer enrol_id,@RequestBody Dependents dependents){
 		Dependents d = service.createDependentsFromEnrol(enrol_id,dependents);
-		return new ResponseEntity<Dependents>(d, HttpStatus.OK);
+		return new ResponseEntity<Dependents>(d, HttpStatus.CREATED);
 	}
 	
 	@ApiOperation(value = "Update an existing Dependent", response = Iterable.class)

@@ -72,7 +72,7 @@ public class EnrolleesController {
 	@PostMapping("addEnrollees")
 	public ResponseEntity<Enrollees> createEnrollees(@RequestBody Enrollees enrollees){
 		Enrollees e = service.createEnrollees(enrollees);
-		return new ResponseEntity<Enrollees>(e, HttpStatus.OK);
+		return new ResponseEntity<Enrollees>(e, HttpStatus.CREATED);
 	}
 	
 	@ApiOperation(value = "Update an existing Enrollee", response = Iterable.class)

@@ -15,6 +15,8 @@ import javax.persistence.Table;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Entity
 @Table(name="enrollees")
 public class Enrollees {
@@ -38,6 +40,19 @@ public class Enrollees {
 	
 	@Column(name="phoneNumber")
 	private String phoneNumber;
+	
+	
+
+	public Enrollees() {
+	}
+
+	public Enrollees(int id, String name, boolean status, String dob, String phoneNumber) {
+		this.id = id;
+		this.name = name;
+		this.status = status;
+		this.dob = dob;
+		this.phoneNumber = phoneNumber;
+	}
 
 	public int getId() {
 		return id;
