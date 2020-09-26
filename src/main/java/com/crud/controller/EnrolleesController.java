@@ -1,12 +1,16 @@
 package com.crud.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
-
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crud.entity.Enrollees;
+import com.crud.exception.EnrolleesNotFoundException;
 import com.crud.services.IEnrolleesService;
 
 import io.swagger.annotations.ApiOperation;
@@ -58,6 +63,10 @@ public class EnrolleesController {
 	@GetMapping("getEnrollees/{id}")
 	public ResponseEntity<Enrollees> getEnrollees(@PathVariable("id") Integer id){
 		Enrollees enrollees = service.getEnrollees(id);
+		if(enrollees ==null)
+		{
+			throw new EnrolleesNotFoundException("Enrollees not found");
+		}
 		return new ResponseEntity<Enrollees>(enrollees, HttpStatus.OK);
 	}
 	
@@ -71,8 +80,14 @@ public class EnrolleesController {
 	)
 	@PostMapping("addEnrollees")
 	public ResponseEntity<Enrollees> createEnrollees(@RequestBody Enrollees enrollees){
-		Enrollees e = service.createEnrollees(enrollees);
-		return new ResponseEntity<Enrollees>(e, HttpStatus.CREATED);
+		if(!isValidFormat("dd/MM/yyyy", enrollees.getDob(), Locale.ENGLISH))
+		{
+			throw new EnrolleesNotFoundException("Enter the Date in this format: dd/MM/yyyy");
+		}
+
+			Enrollees e = service.createEnrollees(enrollees);
+			return new ResponseEntity<Enrollees>(e, HttpStatus.OK);
+		
 	}
 	
 	@ApiOperation(value = "Update an existing Enrollee", response = Iterable.class)
@@ -85,7 +100,10 @@ public class EnrolleesController {
 	)
 	@PutMapping("modifyEnrollees/{id}")
 	public ResponseEntity<Enrollees> updateEnrollees(@PathVariable("id") int id, @RequestBody Enrollees enrollees){
-		
+		if(!isValidFormat("dd/MM/yyyy", enrollees.getDob(), Locale.ENGLISH))
+		{
+			throw new EnrolleesNotFoundException("Enter the Date in this format: dd/MM/yyyy");
+		}
 		Enrollees e = service.updateEnrollees(id, enrollees);
 		return new ResponseEntity<Enrollees>(e, HttpStatus.OK);
 	}
@@ -107,6 +125,34 @@ public class EnrolleesController {
 		}
 		String error = "Error while deleting Enrollees from database";
 		return new ResponseEntity<String>(error,HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	public static boolean isValidFormat(String format, String value, Locale locale) {
+		LocalDateTime ldt = null;
+		DateTimeFormatter fomatter = DateTimeFormatter.ofPattern(format, locale);
+
+		try {
+			ldt = LocalDateTime.parse(value, fomatter);
+			String result = ldt.format(fomatter);
+			return result.equals(value);
+		} catch (DateTimeParseException e) {
+			try {
+				LocalDate ld = LocalDate.parse(value, fomatter);
+				String result = ld.format(fomatter);
+				return result.equals(value);
+			} catch (DateTimeParseException exp) {
+				try {
+					LocalTime lt = LocalTime.parse(value, fomatter);
+					String result = lt.format(fomatter);
+					return result.equals(value);
+				} catch (DateTimeParseException e2) {
+					// Debugging purposes
+					//e2.printStackTrace();
+				}
+			}
+		}
+
+		return false;
 	}
 
 }

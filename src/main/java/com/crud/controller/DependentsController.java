@@ -1,6 +1,7 @@
 package com.crud.controller;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.crud.entity.Dependents;
 import com.crud.entity.Enrollees;
+import com.crud.exception.DependentsNotFoundException;
+import com.crud.exception.EnrolleesNotFoundException;
 import com.crud.services.IDependentsService;
 
 import io.swagger.annotations.ApiOperation;
@@ -29,6 +32,13 @@ public class DependentsController {
 
 	@Autowired
 	private IDependentsService service;
+	
+	@GetMapping("getDependents/{eid}/{did}")
+	public ResponseEntity<Dependents> getEnrollees(@PathVariable("eid") Integer eid,@PathVariable("did") Integer did){
+		Dependents d = service.getDependentsFromEnrol(eid, did);
+		return new ResponseEntity<Dependents>(d, HttpStatus.OK);
+	}
+
 
 	@ApiOperation(value = "View a list of available Dependencies based on Enrollee ID", response = Iterable.class)
 	@ApiResponses(value = {
@@ -56,6 +66,11 @@ public class DependentsController {
 	)
 	@PostMapping("addDependentToEnrol/{id}")
 	public ResponseEntity<Dependents> createDependentsFromEnrol(@PathVariable("id") Integer enrol_id,@RequestBody Dependents dependents){
+		if(!EnrolleesController.isValidFormat("dd/MM/yyyy", dependents.getDob(), Locale.ENGLISH))
+		{
+			throw new DependentsNotFoundException("Enter the Date in this format: dd/MM/yyyy");
+		}
+
 		Dependents d = service.createDependentsFromEnrol(enrol_id,dependents);
 		return new ResponseEntity<Dependents>(d, HttpStatus.CREATED);
 	}

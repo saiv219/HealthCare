@@ -1,0 +1,27 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:latest
+    ports:
+       - "3306:3306"
+    container_name: mysql-docker
+    network_mode: host
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: codechallenge
+        MYSQL_USER: root
+        MYSQL_PASSWORD: root
+    restart: always
+    
+  codechallenge-app:
+    image: codechallenge-app
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - '8080:8080'
+    volumes:
+      - /data/codechallenge-app
+    depends_on:
+       - mysql
+        

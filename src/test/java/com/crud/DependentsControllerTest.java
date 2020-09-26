@@ -9,7 +9,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -19,116 +18,109 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.crud.controller.EnrolleesController;
+import com.crud.controller.DependentsController;
+import com.crud.entity.Dependents;
 import com.crud.entity.Enrollees;
-import com.crud.services.EnrolleesService;
+import com.crud.services.DependentsService;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(value = EnrolleesController.class, secure = false)
-public class EnrolleesControllerTest {
+@WebMvcTest(value = DependentsController.class, secure = false)
+public class DependentsControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockBean
-	private EnrolleesService enrolleesService;
+	private DependentsService dependentsService;
 
-	Enrollees enrollees=new Enrollees(1, "Arjun", true, "09/09/2002", "955555");
+	Enrollees enrollees=new Enrollees(1, "postswagger", true, "11/12/2000", "1234567890");
+	Dependents dependent=new Dependents(1,"hello","05/05/2000",enrollees);
+	String jsonData = "{\"id\":1,\"name\":\"hello\",\"dob\":\"05/05/2000\",\"enrollees\":{\"id\":1,\"name\":\"postswagger\",\"status\":true,\"dob\":\"11/12/2000\",\"phoneNumber\":\"1234567890\"}}";
 
-	String jsonData = "{\"name\":\"Arjun\",\"status\":true,\"dob\":\"09/09/2002\",\"phoneNumber\":\"955555\"}";
 
-	
 	@Test
-	public void retrieveDetailsForEnrollees() throws Exception {
+	public void retrieveDetailsForDependents() throws Exception {
 
 		Mockito.when(
-				enrolleesService.getEnrollees(Mockito.anyInt())).thenReturn(enrollees);
+				dependentsService.getDependentsFromEnrol(Mockito.anyInt(),Mockito.anyInt())).thenReturn(dependent);
 
 		RequestBuilder requestBuilder = MockMvcRequestBuilders.get(
-				"/enrolleesService/getEnrollees/1").accept(
+				"/dependentService/getDependents/1/1").accept(
 						MediaType.APPLICATION_JSON);
 
 		MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
 		System.out.println(result.getResponse());
-		String expected = "{\"id\":1,\"name\":\"Arjun\",\"status\":true,\"dob\":\"09/09/2002\",\"phoneNumber\":\"955555\"}";
 
-		System.out.println(expected);
-		System.out.println(result.getResponse()
-				.getContentAsString());
-		JSONAssert.assertEquals(expected, result.getResponse()
+		JSONAssert.assertEquals(jsonData, result.getResponse()
 				.getContentAsString(), false);
 	}
-	
-	
+
+
 	@Test
-	public void createStudentEnrollees() throws Exception {
-		Enrollees enrollees=new Enrollees(1, "Arjun", true, "09/09/2002", "955555");
+	public void createDependents() throws Exception {
 
 		Mockito.when(
-				enrolleesService.createEnrollees(
-						Mockito.any(Enrollees.class))).thenReturn(enrollees);
-
-		// Send course as body to /students/Student1/courses
+				dependentsService.createDependentsFromEnrol(Mockito.anyInt(),
+						Mockito.any(Dependents.class))).thenReturn(dependent);
+//		String expected = "{\"id\":1,\"name\":\"Arjun\",\"dob\":\"09/08/2020\"}";
 		RequestBuilder requestBuilder = MockMvcRequestBuilders
-				.post("/enrolleesService/addEnrollees")
+				.post("/dependentService/addDependentToEnrol/1")
 				.accept(MediaType.APPLICATION_JSON).content(jsonData)
 				.contentType(MediaType.APPLICATION_JSON);
 
 		MvcResult result = mockMvc.perform(requestBuilder).andReturn();
-
+System.out.println("Remove>>>>>"+result.getResponse()
+				.getContentAsString());
 		MockHttpServletResponse response = result.getResponse();
-		String expected = "{\"id\":1,\"name\":\"Arjun\",\"status\":true,\"dob\":\"09/09/2002\",\"phoneNumber\":\"955555\"}";
-
-		JSONAssert.assertEquals(expected, result.getResponse()
+		JSONAssert.assertEquals(jsonData, result.getResponse()
 				.getContentAsString(), false);
-		assertEquals(HttpStatus.OK.value(), response.getStatus());
+		
+
+		assertEquals(HttpStatus.CREATED.value(), response.getStatus());
 
 
 	}
 
 	@Test
 	public void updateEnrollees() throws Exception {
-		Enrollees enrollees=new Enrollees(1, "Arjun1", true, "09/09/2002", "584826554");
 
 		Mockito.when(
-				enrolleesService.updateEnrollees(Mockito.anyInt(), 
-						Mockito.any(Enrollees.class))).thenReturn(enrollees);
+				dependentsService.modifyDePendentFromEnrol(Mockito.anyInt(), 
+						Mockito.anyInt(), Mockito.any(Dependents.class))).thenReturn(dependent);
 
 		// Send course as body to /students/Student1/courses
 		RequestBuilder requestBuilder = MockMvcRequestBuilders
-				.put("/enrolleesService/modifyEnrollees/1")
+				.put("/dependentService/modifyDependentFromEnrol/1/1")
 				.accept(MediaType.APPLICATION_JSON).content(jsonData)
 				.contentType(MediaType.APPLICATION_JSON);
 
 		MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
 		MockHttpServletResponse response = result.getResponse();
-		String expected = "{\"id\":1,\"name\":\"Arjun1\",\"status\":true,\"dob\":\"09/09/2002\",\"phoneNumber\":\"584826554\"}";
-		JSONAssert.assertEquals(expected, result.getResponse()
+		JSONAssert.assertEquals(jsonData, result.getResponse()
 				.getContentAsString(), false);
 		assertEquals(HttpStatus.OK.value(), response.getStatus());
 
 	}
 	@Test
-	public void deleteEnrollees() throws Exception {
+	public void deleteDependentsFromEnrol() throws Exception {
 
 		Mockito.when(
-				enrolleesService.deleteEnrollees(Mockito.anyInt())).thenReturn(true);
+				dependentsService.deleteDependentsFromEnrol(Mockito.anyInt(),Mockito.anyInt())).thenReturn(true);
 
 		RequestBuilder requestBuilder = MockMvcRequestBuilders
-				.delete("/enrolleesService/removeEnrollees/1")
+				.delete("/dependentService/removeDependentFromEnrollees/1/1")
 				.accept(MediaType.APPLICATION_JSON).content(jsonData)
 				.contentType(MediaType.APPLICATION_JSON);
 
 		MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 		MockHttpServletResponse response = result.getResponse();
-		String expected = "{\"id\":1,\"name\":\"Arjun1\",\"status\":true,\"dob\":\"09/09/2002\",\"phoneNumber\":\"584826554\"}";
-		assertEquals("Enrollees has been deleted successfully", result.getResponse()
+		assertEquals("Dependent from Enrollees has been deleted successfully", result.getResponse()
 				.getContentAsString());
 		assertEquals(HttpStatus.OK.value(), response.getStatus());
 
 	}
 
-	
+
 }
